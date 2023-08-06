@@ -94,6 +94,8 @@ def load_students_from_csv_file():
         csvreader = csv.reader(f)
         header = next(csvreader)
         for row in csvreader:
+            if len(row) !=4:
+                continue
             student = Student(row[0], row[1], row[2], row[3])
             students.append(student)
             count += 1
