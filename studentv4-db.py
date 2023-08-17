@@ -77,7 +77,7 @@ def load_students_from_txt_file():
 ##########################################
 
 def save_students_to_csv_file():
-    with open('GFG2.csv','a') as f:
+    with open('GFG2.csv','a', encoding='utf-8') as f:
         write = csv.writer(f)
         write.writerow(Student.header())
         for student in students:
@@ -88,16 +88,16 @@ def save_students_to_csv_file():
 ##########################################
 
 def load_students_from_csv_file():
-    with open('GFG2.csv','r') as f:
+    with open('GFG2.csv','r', encoding='utf-8') as f:
         count = 0
         row = []
         csvreader = csv.reader(f)
         header = next(csvreader)
         for row in csvreader:
-            if len(row) !=4:
+            if len(row)!=4:
                 continue
-            student = Student(row[0], row[1], row[2], row[3])
-            students.append(student)
+            students.append(Student(row[0], row[1], row[2], row[3]))
+            #students.append(student)
             count += 1
         print('Loaded ', count, ' students from GFG2.csv')
 
@@ -108,25 +108,34 @@ def isStudentsTableExists():
     return c.fetchone()[0]==1
 
 def prepare_database():
-    db_file = Path(file_name)   # only to test if the database file is already present
+    # db_file = Path(file_name)   # only to test if the database file is already present
     if not isStudentsTableExists():
-        # database file not present, so create databse and also create relevant tables once
+        # database file not present, so create database and also create relevant tables once
         c.execute('CREATE TABLE students (name text, classs text, section text, rollno real)')
 
 def save_students_to_db_file():
     prepare_database()
     for student in students:
+        print(student)
         c.execute('INSERT INTO students VALUES (?, ?, ?, ?)', (student.name, student.classs, student.section, student.roll_no))
+    conn.commit()
 
 def load_students_from_db_file():
     prepare_database()
-    c.execute('SELECT * FROM STUDENTS')
+    count = 0
+    c.execute('SELECT * FROM STUDENTS')  
     rows = c.fetchall() 
     for row in rows:
         student = Student(row[0], row[1], row[2], row[3])
         students.append(student)
-    print('Loaded',rows.count(),'students from students.sqlite')    
-
+        count +=1
+    print('Loaded',count,'students from students.sqlite')    
+##########################################
+def exit_app():
+    c.close()
+    conn.close()
+    quit()
+    
 ##########################################
 while True:
     print('\n1 --> Add student')
@@ -158,10 +167,12 @@ while True:
         save_students_to_db_file()
     elif int(choice) == 8:
         load_students_from_db_file()
+    elif int(choice) == 9:
+        exit_app()
     else:
         confirmation = input('Are you sure! you want to quit? (y/n)')
         if confirmation == 'y':
-            quit()
+            exit_app()
         elif confirmation == 'n':
             continue
 
